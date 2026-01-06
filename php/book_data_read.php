@@ -1,0 +1,51 @@
+<?php
+
+session_start();
+// echo "ユーザーデータ取得処理開始";
+// POST情報ない時終了
+if (!isset($_POST["isbn"]) || $_POST["isbn"] === "") {
+    exit();
+}
+
+$isbn = $_POST["isbn"];
+
+// 各種項目設定
+$dbn = 'mysql:dbname=ranobe_db;charset=utf8mb4;port=3306;host=localhost';
+$user = 'root';
+$pwd = '';
+
+// DB接続
+try {
+    $pdo = new PDO($dbn, $user, $pwd);
+} catch (PDOException $e) {
+    echo json_encode(["db error" => "{$e->getMessage()}"]);
+    exit();
+}
+
+// SQL接続
+$sql = 'SELECT * FROM good_point_table';
+$stmt = $pdo->prepare($sql);
+
+try {
+    $status = $stmt->execute();
+} catch (PDOException $e) {
+    echo json_encode(["sql error" => "{$e->getMessage()}"]);
+    exit();
+}
+
+// SQL実行の処理
+$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$goodPoints = [];
+foreach ($result as $record) {
+    if ($record["isbn"] === $isbn) {
+        // isbn が一致しているので配列に保存
+        $goodPoints[] = [
+            "category" => $record["category"],
+            "goodPoint" => $record["goodPoint"]
+        ];
+    }
+}
+
+echo json_encode($goodPoints, JSON_UNESCAPED_UNICODE);
+
+?>
