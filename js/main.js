@@ -328,59 +328,17 @@ $(document).on("click", ".statisticsButton", async function () {
     await $.post("php/book_data_read.php", {
         isbn: isbn
     }, function (res) {
-        // console.log("res", res);
         const bookData = JSON.parse(res);
-        // console.log("userData", userData);
-        const allDataCount = bookData.length;
 
-        // 同じ項目のデータが何個あるかを保存していく
-        for (let i = 0; i < bookData.length; i++) {
-            bookData[i].count = 1; // 初期値１（１つ目なので）
-            for (let c = i + 1; c < bookData.length; c++) {
-                // console.log("i:", i);
-                // console.log("c:", c);
-                if (bookData[i].goodPoint === bookData[c].goodPoint) {
-                    // console.log("i と c が一致しました");
-                    // console.log("userData[i].count をプラス１して、userData[c]を削除、番号詰まるのでc--して調整");
-                    bookData[i].count++;
-                    bookData.splice(c, 1);
-                    c--;
-                    // console.log("削除後のuserData:", userData);
-                }
-            }
-        }
-        // [{category: "世界観", goodPoint: "ファンタジー", count: 6},{...}] みたいに並んでいる
-        // 上から順にcountの数値を見て、数値が大きい順に並び変える
-        const sortData = [];
-        let number = 0;
-        const length = bookData.length;
-        for (let a = 0; a < length; a++) {
-            // console.log("何回目のチェックか :", a);
-            for (let i = 0; i < bookData.length; i++) {
-                if (bookData[i].count > bookData[number].count) {
-                    // console.log("入れ替え前");
-                    // console.log("array1[i]", userData[i].count);
-                    // console.log("array1[number]", userData[number].count);
-                    number = i;
-                    // console.log("入れ替え後");
-                    // console.log("array1[i]", userData[i].count);
-                    // console.log("array1[number]", userData[number].count);
-                }
-            }
-            // console.log("最大値の入ってる配列番号がnumberに入ってるはず");
-            // console.log("number:", number);
-            sortData.push(bookData[number]);
-            // console.log("sortData:", sortData);
-            bookData.splice(number, 1);
-            number = 0;
-        }
+        // 項目ごとに多い順に並び替えして、件数も付与した配列を返す関数
+        const sortData = dataSort(bookData);
 
         // countが大きい順に並んだので表示していく
         let html = "<p>みんなの好みの傾向は・・・</p>";
 
         for (let i = 0; i < sortData.length; i++) {
             html += `
-            <p>${i+1}位：${sortData[i].category} が ${sortData[i].goodPoint} </p>`;
+            <p>${i + 1}位：${sortData[i].category} が ${sortData[i].goodPoint} </p>`;
         };
 
         // タグを埋め込む
@@ -401,15 +359,15 @@ $(document).on("click", ".commentBtn", async function () {
 
     console.log("コメントボタンクリックされました");
 
-    // 保存中にボタンの表示を変更する
-    $(".commentBtn").text("保存中・・・");
+    // // 保存中にボタンの表示を変更する
+    // $(".commentBtn").text("保存中・・・");
 
-    // インデックス番号取得
-    const index = $(this).data("index");
-    console.log("index", index);
+    // // インデックス番号取得
+    // const index = $(this).data("index");
+    // console.log("index", index);
 
-    // オブジェクトデータのコメントを入力内容で更新する
-    favoriteBookList[index].comment = $('#commentText').val();
+    // // オブジェクトデータのコメントを入力内容で更新する
+    // favoriteBookList[index].comment = $('#commentText').val();
     // console.log(favoriteBookList[index].comment); // ちゃんと入ってるの確認しました
 
     // データ更新
@@ -496,47 +454,8 @@ $(".userDataButton").on("click", async function () {
         // console.log("userData", userData);
         const allDataCount = userData.length;
 
-        // 同じ項目のデータが何個あるかを保存していく
-        for (let i = 0; i < userData.length; i++) {
-            userData[i].count = 1; // 初期値１（１つ目なので）
-            for (let c = i + 1; c < userData.length; c++) {
-                // console.log("i:", i);
-                // console.log("c:", c);
-                if (userData[i].goodPoint === userData[c].goodPoint) {
-                    // console.log("i と c が一致しました");
-                    // console.log("userData[i].count をプラス１して、userData[c]を削除、番号詰まるのでc--して調整");
-                    userData[i].count++;
-                    userData.splice(c, 1);
-                    c--;
-                    // console.log("削除後のuserData:", userData);
-                }
-            }
-        }
-        // [{category: "世界観", goodPoint: "ファンタジー", count: 6},{...}] みたいに並んでいる
-        // 上から順にcountの数値を見て、数値が大きい順に並び変える
-        const sortData = [];
-        let number = 0;
-        const length = userData.length;
-        for (let a = 0; a < length; a++) {
-            // console.log("何回目のチェックか :", a);
-            for (let i = 0; i < userData.length; i++) {
-                if (userData[i].count > userData[number].count) {
-                    // console.log("入れ替え前");
-                    // console.log("array1[i]", userData[i].count);
-                    // console.log("array1[number]", userData[number].count);
-                    number = i;
-                    // console.log("入れ替え後");
-                    // console.log("array1[i]", userData[i].count);
-                    // console.log("array1[number]", userData[number].count);
-                }
-            }
-            // console.log("最大値の入ってる配列番号がnumberに入ってるはず");
-            // console.log("number:", number);
-            sortData.push(userData[number]);
-            // console.log("sortData:", sortData);
-            userData.splice(number, 1);
-            number = 0;
-        }
+        // 項目ごとに多い順に並び替えして、件数も付与した配列を返す関数
+        const sortData = dataSort(userData);
 
         // countが大きい順に並んだので表示していく
         let html = "<p>あなたの好みの傾向は・・・</p>";
@@ -718,4 +637,50 @@ async function goodPointRead(isbn) {
         }
         $("#registeredView").html(goodPointHtml);
     });
+}
+
+// DBから取得したココ好きポイントデータを受け取って、多い項目順にソート、何件あるかを追加した配列を返す
+function dataSort(data) {
+    // 同じ項目のデータが何個あるかを保存していく
+    for (let i = 0; i < data.length; i++) {
+        data[i].count = 1; // 初期値１（１つ目なので）
+        for (let c = i + 1; c < data.length; c++) {
+            // console.log("i:", i);
+            // console.log("c:", c);
+            if (data[i].goodPoint === data[c].goodPoint) {
+                // console.log("i と c が一致しました");
+                // console.log("userData[i].count をプラス１して、userData[c]を削除、番号詰まるのでc--して調整");
+                data[i].count++;
+                data.splice(c, 1);
+                c--;
+                // console.log("削除後のuserData:", userData);
+            }
+        }
+    }
+    // [{category: "世界観", goodPoint: "ファンタジー", count: 6},{...}] みたいに並んでいる
+    // 上から順にcountの数値を見て、数値が大きい順に並び変える
+    const sortData = [];
+    let number = 0;
+    const length = data.length;
+    for (let a = 0; a < length; a++) {
+        // console.log("何回目のチェックか :", a);
+        for (let i = 0; i < data.length; i++) {
+            if (data[i].count > data[number].count) {
+                // console.log("入れ替え前");
+                // console.log("array1[i]", userData[i].count);
+                // console.log("array1[number]", userData[number].count);
+                number = i;
+                // console.log("入れ替え後");
+                // console.log("array1[i]", userData[i].count);
+                // console.log("array1[number]", userData[number].count);
+            }
+        }
+        // console.log("最大値の入ってる配列番号がnumberに入ってるはず");
+        // console.log("number:", number);
+        sortData.push(data[number]);
+        // console.log("sortData:", sortData);
+        data.splice(number, 1);
+        number = 0;
+    }
+    return sortData;
 }

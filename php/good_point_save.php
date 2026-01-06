@@ -59,17 +59,3 @@ for ($i = 0; $i < count($goodPoint); $i++) {
         exit();
     }
 }
-
-// // 書き込みモードで開く
-// $file = fopen("../data/good_points.csv", "a");
-// flock($file, LOCK_EX);
-
-// // $goodPointの配列を順番に書き込む
-// for ($i = 0; $i < count($goodPoint); $i++) {
-//     fwrite($file, $userID . "," . $isbn . "," . $title . ",");
-//     fputcsv($file, $goodPoint[$i]);
-// }
-
-// flock($file, LOCK_UN);
-// fclose($file);
-// exit();
